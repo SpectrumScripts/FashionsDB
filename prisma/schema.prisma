@@ -1,0 +1,157 @@
+// File: schema.prisma
+// TODO: materials of clothes
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int      @id @unique @default(autoincrement())
+  username      String?  @unique @default("Anonymous")
+  role          Role     @default(USER)
+  email         String   @unique
+  login         String   @unique
+  password      String?
+  apiKey        String?
+  verifiedEmail Boolean  @default(false)
+  verified      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  brandsFK      Brand[]  @relation("officialAccountFK")
+}
+
+model Brand {
+  id                Int              @id @unique
+  name              String
+  logo              String?
+  description       String?
+  establishmentDate DateTime?
+  country           String?
+  officialAccountFK User?            @relation("officialAccountFK", fields: [officialAccount], references: [id])
+  officialAccount   Int?
+  socials           Social[]
+  contact           Contact[]
+  address           Address[]
+  products          ProductToBrand[]
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  BrandToProduct BrandToProduct[]
+}
+
+model Address {
+  id         Int      @id @unique
+  brandID    Int
+  street     String?
+  postalCode String?
+  city       String?
+  country    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  brand      Brand    @relation(fields: [brandID], references: [id])
+}
+
+model Social {
+  id        Int      @id @unique
+  brandID   Int?
+  platform  String
+  country String?
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  brand     Brand?   @relation(fields: [brandID], references: [id])
+}
+
+model Contact {
+  id        Int      @id @unique
+  brandID   Int?
+  type      String
+  value     String
+  country   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  brand     Brand?   @relation(fields: [brandID], references: [id])
+}
+
+model Product {
+  id             Int                 @id @unique @default(autoincrement())
+  name           String
+  description    String
+  url            String
+  price          Float
+  size           String[]
+  color          String[]
+  availability   Boolean             @default(false)
+  verified       Boolean             @default(false)
+  categories     CategoryToProduct[]
+  genres         GenreToProduct[]
+  brands         BrandToProduct[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  ProductToBrand ProductToBrand[]
+}
+
+model Category {
+  name     String              @id @unique
+  verified Boolean             @default(false)
+  products CategoryToProduct[]
+}
+
+model Genre {
+  name     String           @id @unique
+  verified Boolean          @default(false)
+  products GenreToProduct[]
+}
+
+model CategoryToProduct {
+  id         Int      @id @unique @default(autoincrement())
+  categoryId String
+  productId  Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  category   Category @relation(fields: [categoryId], references: [name])
+  product    Product  @relation(fields: [productId], references: [id])
+}
+
+model GenreToProduct {
+  id        Int      @id @unique @default(autoincrement())
+  genreName String
+  productId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  genre     Genre    @relation(fields: [genreName], references: [name])
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model BrandToProduct {
+  id        Int      @id @unique @default(autoincrement())
+  brandId   Int
+  productId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  brand     Brand    @relation(fields: [brandId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model ProductToBrand {
+  id        Int      @id @unique @default(autoincrement())
+  brandId   Int
+  productId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  brand     Brand    @relation(fields: [brandId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  USER
+  BANNED
+}
+
+
+
