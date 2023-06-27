@@ -1,0 +1,100 @@
+// I added the Category and Genre models to represent the relationships between categories/genres and products.
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Brand {
+  id                Int       @id @unique
+  name              String
+  logo              String?
+  description       String?
+  establishmentDate DateTime?
+  country           String?
+  officialAccount   Int?
+  socials           Social[]
+  contact           Contact[]
+  addresses         Address[]
+  products          Product[]
+}
+
+model Social {
+  id       Int     @id @unique
+  brand    Brand   @relation(fields: [brandId], references: [id])
+  brandId  Int
+  platform String
+  url      String
+  country  String?
+}
+
+model Contact {
+  id      Int     @id @unique
+  brand   Brand   @relation(fields: [brandId], references: [id])
+  brandId Int
+  country String?
+  value   String
+  type    String
+}
+
+model Address {
+  id         Int      @id @unique
+  brand      Brand    @relation(fields: [brandId], references: [id])
+  brandId    Int
+  street     String?
+  postalCode String?
+  city       String?
+  country    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Product {
+  id           Int                 @id @unique
+  name         String
+  description  String
+  url          String
+  price        Float
+  size         String[]
+  color        String[]
+  availability Boolean
+  verified     Boolean
+  categories   CategoryToProduct[]
+  genres       GenreToProduct[]
+  brand        Brand               @relation(fields: [brandId], references: [id])
+  brandId      Int
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+}
+
+model Category {
+  id       Int                 @id @unique
+  name     String
+  products CategoryToProduct[]
+}
+
+model Genre {
+  id       Int              @id @unique
+  name     String
+  products GenreToProduct[]
+}
+
+model CategoryToProduct {
+  id         Int      @id @unique
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  Int
+}
+
+model GenreToProduct {
+  id        Int     @id @unique
+  genre     Genre   @relation(fields: [genreId], references: [id])
+  genreId   Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+}

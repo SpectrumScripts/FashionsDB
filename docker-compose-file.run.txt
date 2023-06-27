@@ -1,0 +1,24 @@
+docker run -d -e POSTGRES_DB=fashionDB -e POSTGRES_PASSWORD=testPassword -e POSTGRES_USER=postgres -p 6500:5432 postgres -v /var/lib/postgresql/data/
+
+POSTGRES_DB=fashionDB
+POSTGRES_PASSWORD=testPassword
+POSTGRES_USER=postgres
+Port Range: 6500:5432 //-> Range to reduce risk of collisions
+
+compose.yml
+-----------
+services:
+  postgres:
+    container_name: postgres
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=testPassword
+      - POSTGRES_DB=fashionDB
+    ports:
+      - 6500:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+volumes:
+  postgres_data:
